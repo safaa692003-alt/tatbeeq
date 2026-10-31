@@ -1,0 +1,1587 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مديرية تربية المثنى - قسم الإعداد والتدريب | تسجيل الطلبة المطبقين من خارج المحافظة</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
+  
+  <!-- Google Fonts: Cairo -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Canvas Confetti for Celebration -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <!-- Google Firebase SDK (Compat Version) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    :root {
+      --primary: #1e3a8a;       /* Deep Navy Blue */
+      --primary-light: #2563eb; /* Royal Blue */
+      --primary-dark: #0f172a;  /* Dark Slate */
+      --gold: #d97706;          /* Rich Amber / Gold */
+      --gold-light: #f59e0b;
+      --gold-soft: #fef3c7;
+      --accent: #059669;        /* Emerald Green */
+      --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+      --card-bg: rgba(255, 255, 255, 0.98);
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      --shadow-glow: 0 0 25px rgba(37, 99, 235, 0.25);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Cairo', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background: #f1f5f9;
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Decorative Background */
+    .bg-pattern {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.04;
+      background-image: radial-gradient(#1e3a8a 1px, transparent 1px), radial-gradient(#1e3a8a 1px, #f1f5f9 1px);
+      background-size: 40px 40px;
+      background-position: 0 0, 20px 20px;
+    }
+
+    /* Header Styling */
+    header {
+      position: relative;
+      z-index: 10;
+      background: linear-gradient(135deg, #0a192f 0%, #1e3a8a 60%, #172554 100%);
+      color: white;
+      padding: 1.5rem 1rem 2rem;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.25);
+      border-bottom: 4px solid var(--gold);
+    }
+
+    .header-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 1rem;
+    }
+
+    .logo-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 110px;
+      height: 110px;
+      transition: transform 0.3s ease;
+      position: relative;
+    }
+
+    .logo-badge:hover {
+      transform: scale(1.06);
+    }
+
+    .header-logo-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.45));
+    }
+
+    .dept-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #fbbf24;
+      letter-spacing: 0.5px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    }
+
+    .header-main-title {
+      font-size: 1.75rem;
+      font-weight: 900;
+      line-height: 1.4;
+      color: #ffffff;
+      background: linear-gradient(to left, #ffffff, #e2e8f0);
+      -webkit-background-clip: text;
+      max-width: 800px;
+      padding: 0.25rem 0.75rem;
+      border-radius: 8px;
+    }
+
+    .header-sub-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(217, 119, 6, 0.2);
+      border: 1px solid rgba(251, 191, 36, 0.4);
+      color: #fef08a;
+      padding: 0.35rem 1.25rem;
+      border-radius: 50px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      backdrop-filter: blur(4px);
+    }
+
+    /* Progress Indicators (Pages Flow) */
+    .steps-nav {
+      max-width: 600px;
+      margin: -1.25rem auto 1.5rem;
+      position: relative;
+      z-index: 15;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 0 1rem;
+    }
+
+    .step-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: white;
+      padding: 0.5rem 1.25rem;
+      border-radius: 50px;
+      box-shadow: var(--shadow-sm);
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      border: 2px solid #e2e8f0;
+      transition: all 0.3s ease;
+    }
+
+    .step-indicator.active {
+      color: var(--primary);
+      border-color: var(--primary-light);
+      background: #eff6ff;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+      transform: translateY(-2px);
+    }
+
+    .step-indicator.done {
+      color: var(--accent);
+      border-color: var(--accent);
+      background: #ecfdf5;
+    }
+
+    .step-connector {
+      width: 40px;
+      height: 3px;
+      background: #cbd5e1;
+      margin: 0 0.25rem;
+    }
+
+    .step-connector.done {
+      background: var(--accent);
+    }
+
+    /* Main Content Container */
+    main {
+      flex: 1;
+      max-width: 860px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1rem 1rem 3rem;
+      position: relative;
+      z-index: 5;
+    }
+
+    /* App Pages Container */
+    .page-card {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 2.5rem 2rem;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid rgba(226, 232, 240, 0.8);
+      position: relative;
+      overflow: hidden;
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    .page-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, #1e3a8a, #d97706, #1e3a8a);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    /* --- PAGE 1: Home Screen --- */
+    .welcome-hero {
+      text-align: center;
+      padding: 1.5rem 0;
+    }
+
+    .hero-icon-container {
+      width: 100px;
+      height: 100px;
+      margin: 0 auto 1.5rem;
+      background: linear-gradient(135deg, #eff6ff, #dbeafe);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+      font-size: 2.8rem;
+      box-shadow: 0 10px 20px rgba(37, 99, 235, 0.12);
+      border: 2px dashed rgba(37, 99, 235, 0.4);
+    }
+
+    .hero-title {
+      font-size: 1.85rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+      margin-bottom: 0.75rem;
+    }
+
+    .hero-desc {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      max-width: 620px;
+      margin: 0 auto 2rem;
+      line-height: 1.7;
+    }
+
+    .notice-box {
+      background: #fffbeb;
+      border-right: 5px solid var(--gold);
+      padding: 1.25rem;
+      border-radius: 12px;
+      text-align: right;
+      margin-bottom: 2.5rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .notice-box h4 {
+      color: #92400e;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.05rem;
+    }
+
+    .notice-box ul {
+      list-style-type: none;
+      padding: 0;
+      color: #78350f;
+      font-size: 0.95rem;
+      line-height: 1.7;
+    }
+
+    .notice-box ul li {
+      position: relative;
+      padding-right: 1.5rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .notice-box ul li::before {
+      content: '✓';
+      position: absolute;
+      right: 0;
+      color: var(--gold);
+      font-weight: bold;
+    }
+
+    /* Big Action Button (Page 1) */
+    .btn-main-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+
+    .btn-cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+      color: white;
+      font-size: 1.45rem;
+      font-weight: 800;
+      padding: 1.15rem 3.5rem;
+      border-radius: 60px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(30, 58, 138, 0.35);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      overflow: hidden;
+      text-decoration: none;
+    }
+
+    .btn-cta::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(60deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+      transform: rotate(30deg);
+      animation: shine 4s infinite linear;
+    }
+
+    @keyframes shine {
+      0% { transform: translateX(-100%) rotate(30deg); }
+      100% { transform: translateX(100%) rotate(30deg); }
+    }
+
+    .btn-cta:hover {
+      transform: translateY(-4px) scale(1.03);
+      box-shadow: 0 15px 30px rgba(37, 99, 235, 0.45);
+      background: linear-gradient(135deg, #172554 0%, #1d4ed8 100%);
+    }
+
+    .btn-cta:active {
+      transform: translateY(1px) scale(0.98);
+    }
+
+    .btn-cta i {
+      font-size: 1.3rem;
+      transition: transform 0.3s ease;
+    }
+
+    .btn-cta:hover i {
+      transform: translateX(-6px);
+    }
+
+    /* --- PAGE 2: Registration Form --- */
+    .form-header {
+      border-bottom: 2px solid #f1f5f9;
+      padding-bottom: 1rem;
+      margin-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .form-header h2 {
+      font-size: 1.5rem;
+      color: var(--primary-dark);
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .form-required-legend {
+      font-size: 0.85rem;
+      color: #ef4444;
+      background: #fef2f2;
+      padding: 0.35rem 0.85rem;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+
+    .registration-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.4rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .form-group label {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #334155;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .form-group label span.req {
+      color: #dc2626;
+      font-size: 1.1rem;
+    }
+
+    .form-group label i {
+      color: var(--primary-light);
+      font-size: 0.95rem;
+      width: 18px;
+      text-align: center;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.9rem 1.15rem;
+      font-size: 1.05rem;
+      border: 2px solid #cbd5e1;
+      border-radius: 12px;
+      background: #f8fafc;
+      color: #0f172a;
+      transition: all 0.25s ease;
+      outline: none;
+    }
+
+    .form-control:focus {
+      background: #ffffff;
+      border-color: var(--primary-light);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+    }
+
+    .form-control.is-invalid {
+      border-color: #ef4444;
+      background: #fff5f5;
+    }
+
+    .form-control.is-valid {
+      border-color: #10b981;
+      background: #f0fdf4;
+    }
+
+    .invalid-feedback {
+      color: #dc2626;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: none;
+      margin-top: 0.2rem;
+      padding-right: 0.4rem;
+    }
+
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+    }
+
+    @media (max-width: 640px) {
+      .form-grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .btn-submit-code {
+      margin-top: 1rem;
+      background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+      color: white;
+      font-size: 1.35rem;
+      font-weight: 800;
+      padding: 1.1rem 2.5rem;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.85rem;
+      box-shadow: 0 10px 20px rgba(5, 150, 105, 0.3);
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+
+    .btn-submit-code:hover {
+      background: linear-gradient(135deg, #047857 0%, #059669 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 25px rgba(5, 150, 105, 0.4);
+    }
+
+    .btn-submit-code:active {
+      transform: translateY(1px);
+    }
+
+    .form-actions-bar {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    .btn-back {
+      background: transparent;
+      border: 1px solid #cbd5e1;
+      color: #475569;
+      font-size: 0.95rem;
+      font-weight: 700;
+      padding: 0.65rem 1.5rem;
+      border-radius: 30px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+    }
+
+    .btn-back:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+
+    /* --- PAGE 3: Confirmation & Code View --- */
+    .thankyou-wrapper {
+      text-align: center;
+      padding: 1rem 0;
+    }
+
+    .success-badge-icon {
+      width: 85px;
+      height: 85px;
+      background: #ecfdf5;
+      color: #059669;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.8rem;
+      margin: 0 auto 1.25rem;
+      border: 3px solid #10b981;
+      box-shadow: 0 0 25px rgba(16, 185, 129, 0.25);
+      animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.4); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .thankyou-heading {
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: #065f46;
+      margin-bottom: 0.5rem;
+    }
+
+    .thankyou-sub {
+      font-size: 1.1rem;
+      color: #4b5563;
+      max-width: 600px;
+      margin: 0 auto 1.75rem;
+      line-height: 1.6;
+    }
+
+    /* Security Code Card */
+    .code-display-card {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: white;
+      border-radius: 18px;
+      padding: 2rem 1.5rem;
+      margin: 1.5rem auto 2rem;
+      max-width: 580px;
+      box-shadow: 0 15px 35px rgba(15, 23, 42, 0.25);
+      border: 2px solid var(--gold);
+      position: relative;
+    }
+
+    .code-display-card::after {
+      content: 'OFFICIAL ID';
+      position: absolute;
+      top: 12px;
+      left: 15px;
+      font-size: 0.75rem;
+      letter-spacing: 2px;
+      color: var(--gold-light);
+      font-weight: 800;
+      opacity: 0.6;
+    }
+
+    .code-label {
+      font-size: 1rem;
+      color: #cbd5e1;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .code-value {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 3rem;
+      font-weight: 900;
+      letter-spacing: 6px;
+      color: #fbbf24;
+      text-shadow: 0 0 15px rgba(251, 191, 36, 0.5);
+      direction: ltr;
+      display: inline-block;
+      padding: 0.4rem 1.5rem;
+      background: rgba(255, 255, 255, 0.07);
+      border-radius: 12px;
+      border: 1px dashed rgba(251, 191, 36, 0.5);
+      margin: 0.5rem 0 1rem;
+    }
+
+    .code-breakdown {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      font-size: 0.8rem;
+      color: #94a3b8;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 0.85rem;
+      margin-top: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .code-breakdown span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .code-breakdown span b {
+      color: #f1f5f9;
+    }
+
+    /* Student Information Summary in Page 3 */
+    .student-summary-table {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 1.25rem;
+      max-width: 580px;
+      margin: 0 auto 2rem;
+      text-align: right;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.55rem 0;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 0.95rem;
+    }
+
+    .summary-row:last-child {
+      border-bottom: none;
+    }
+
+    .summary-row .label {
+      color: #64748b;
+      font-weight: 600;
+    }
+
+    .summary-row .value {
+      color: #0f172a;
+      font-weight: 800;
+    }
+
+    /* Actions for Code View */
+    .code-actions-group {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-top: 1.5rem;
+    }
+
+    .btn-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.75rem 1.6rem;
+      border-radius: 30px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+    }
+
+    .btn-copy {
+      background: #eff6ff;
+      color: var(--primary-light);
+      border: 1px solid #bfdbfe;
+    }
+
+    .btn-copy:hover {
+      background: #dbeafe;
+    }
+
+    .btn-print {
+      background: #f8fafc;
+      color: #334155;
+      border: 1px solid #cbd5e1;
+    }
+
+    .btn-print:hover {
+      background: #e2e8f0;
+    }
+
+    .btn-reset {
+      background: #f1f5f9;
+      color: #475569;
+    }
+
+    .btn-reset:hover {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+
+    /* Footer Styling */
+    footer {
+      background: #0f172a;
+      color: #94a3b8;
+      padding: 1.75rem 1rem;
+      text-align: center;
+      border-top: 3px solid var(--gold);
+      position: relative;
+      z-index: 10;
+      margin-top: auto;
+    }
+
+    .footer-content {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .designer-credit {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #f8fafc;
+      letter-spacing: 0.3px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 0.5rem 1.5rem;
+      border-radius: 50px;
+      border: 1px solid rgba(217, 119, 6, 0.4);
+    }
+
+    .designer-credit span.badge-gold {
+      color: #fbbf24;
+    }
+
+    .footer-subtext {
+      font-size: 0.85rem;
+      color: #64748b;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #1e293b;
+      color: white;
+      padding: 0.85rem 1.75rem;
+      border-radius: 50px;
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 700;
+      font-size: 0.95rem;
+      z-index: 9999;
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+      border-right: 4px solid var(--gold);
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* Print View Customization */
+    @media print {
+      body {
+        background: white !important;
+        color: black !important;
+      }
+      .bg-pattern, .steps-nav, .btn-cta, .btn-action, .btn-back, footer, .form-actions-bar {
+        display: none !important;
+      }
+      header {
+        background: none !important;
+        color: black !important;
+        border-bottom: 2px solid #000 !important;
+        box-shadow: none !important;
+        padding: 1rem 0 !important;
+      }
+      .header-main-title, .dept-title {
+        color: #000 !important;
+        -webkit-text-fill-color: #000 !important;
+        text-shadow: none !important;
+      }
+      .page-card {
+        border: 2px solid #000 !important;
+        box-shadow: none !important;
+        padding: 1rem !important;
+      }
+      .code-display-card {
+        background: white !important;
+        color: black !important;
+        border: 2px dashed #000 !important;
+        box-shadow: none !important;
+      }
+      .code-value {
+        color: black !important;
+        border-color: black !important;
+        text-shadow: none !important;
+      }
+      .code-breakdown {
+        color: #333 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Decorative Pattern -->
+  <div class="bg-pattern"></div>
+
+  <!-- Header Section with Official Branding & Logo -->
+  <header>
+    <div class="header-container">
+      <!-- Official Logo of "قسم الإعداد والتدريب" -->
+      <div class="logo-badge" title="شعار قسم الإعداد والتدريب">
+        <img src="logo.png" alt="شعار قسم الإعداد والتدريب" class="header-logo-img">
+      </div>
+
+      <!-- Department Identification -->
+      <div class="dept-title">
+        <i class="fa-solid fa-award"></i> مديرية تربية المثنى - قسم الإعداد والتدريب
+      </div>
+
+      <!-- Explicit Header Title as Requested by User -->
+      <h1 class="header-main-title">
+        الموقع الخاص بتسجيل الطلبة المطبقين من خارج المحافظة فقط
+      </h1>
+
+      <div class="header-sub-badge">
+        <i class="fa-solid fa-shield-halved"></i>
+        <span>بوابة التسجيل الإلكتروني الرسمية وتوليد الأكواد الوزارية</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Interactive Step Navigation -->
+  <div class="steps-nav">
+    <div id="step-ind-1" class="step-indicator active">
+      <i class="fa-solid fa-house"></i>
+      <span>الرئيسية</span>
+    </div>
+    <div id="step-conn-1" class="step-connector"></div>
+    <div id="step-ind-2" class="step-indicator">
+      <i class="fa-solid fa-file-pen"></i>
+      <span>استمارة التسجيل</span>
+    </div>
+    <div id="step-conn-2" class="step-connector"></div>
+    <div id="step-ind-3" class="step-indicator">
+      <i class="fa-solid fa-id-card"></i>
+      <span>كود التطبيق</span>
+    </div>
+  </div>
+
+  <!-- Main View Router -->
+  <main>
+    <div class="page-card">
+
+      <!-- ================= PAGE 1: الصفحة الرئيسية ================= -->
+      <section id="page-1" class="page active">
+        <div class="welcome-hero">
+          <div class="hero-icon-container">
+            <i class="fa-solid fa-user-graduate"></i>
+          </div>
+
+          <h2 class="hero-title">أهلاً وسهلاً بكم في بوابة المطبقين</h2>
+          <p class="hero-desc">
+            نرحب بطلبتنا الأعزاء القادمين من خارج المحافظة لإتمام متطلبات التطبيق الميداني. يُرجى الدخول وملء بيانات الاستمارة الإلكترونية بدقة للحصول على كود التطبيق المعتمد.
+          </p>
+
+          <div class="notice-box">
+            <h4>
+              <i class="fa-solid fa-circle-exclamation"></i>
+              تعليمات وشروط هامة:
+            </h4>
+            <ul>
+              <li>هذا الموقع مخصص حصراً للطلبة المطبقين من خارج المحافظة.</li>
+              <li>جميع الحقول في استمارة التسجيل إجبارية ويتحمل الطالب صحة المعلومات المدخلة.</li>
+              <li>يتم توليد كود خاص بكل طالب يُستعمل كمرجع رسمي لدى إدارة قسم الإعداد والتدريب.</li>
+              <li>يرجى الاحتفاظ برقم الكود أو طباعة البطاقة فور إتمام التسجيل.</li>
+              <li>سوف لن يعتمد الكود في حال لم تخاطبنا الجامعة بكتاب رسمي معنون الى ( مديرية تربية المثنى - قسم الاعداد والتدريب ) يوضح كلية وقسم الطالب ومرحلته لغرض التطبيق .</li>
+            </ul>
+          </div>
+
+          <!-- User Requirement: ايقونة باسم "انقر هنا" -->
+          <div class="btn-main-container">
+            <button id="btn-goto-form" class="btn-cta" type="button" aria-label="الانتقال إلى استمارة التسجيل">
+              <span>انقر هنا</span>
+              <i class="fa-solid fa-arrow-left"></i>
+            </button>
+            <p style="margin-top: 0.85rem; font-size: 0.85rem; color: #64748b; font-weight: 600;">
+              اضغط على الأيقونة أعلاه للانتقال المباشر لاستمارة البيانات
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= PAGE 2: الصفحة الثانية (استمارة التسجيل) ================= -->
+      <section id="page-2" class="page">
+        <div class="form-header">
+          <h2>
+            <i class="fa-solid fa-clipboard-user" style="color: var(--primary-light);"></i>
+            استمارة تسجيل الطالب المطبق
+          </h2>
+          <span class="form-required-legend">
+            <i class="fa-solid fa-asterisk" style="font-size: 0.7rem;"></i> جميع الحقول مطلوبة وإجبارية
+          </span>
+        </div>
+
+        <form id="registrationForm" class="registration-form" novalidate>
+          
+          <!-- 1. الاسم الرباعي -->
+          <div class="form-group">
+            <label for="fullName">
+              <i class="fa-solid fa-user"></i>
+              <span>الاسم الرباعي</span>
+              <span class="req">*</span>
+            </label>
+            <div class="input-wrapper">
+              <input 
+                type="text" 
+                id="fullName" 
+                name="fullName" 
+                class="form-control" 
+                placeholder="أدخل اسمك الرباعي الكامل (مثال: علي حسن كاظم حسين)" 
+                required
+                autocomplete="name"
+              >
+            </div>
+            <div id="fullName-err" class="invalid-feedback">
+              يرجى إدخال الاسم الرباعي بشكل صحيح (يجب أن يتكون من 4 أسماء على الأقل).
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <!-- 2. الجامعة -->
+            <div class="form-group">
+              <label for="university">
+                <i class="fa-solid fa-building-columns"></i>
+                <span>الجامعة</span>
+                <span class="req">*</span>
+              </label>
+              <div class="input-wrapper">
+                <input 
+                  type="text" 
+                  id="university" 
+                  name="university" 
+                  class="form-control" 
+                  placeholder="مثال: جامعة بغداد / جامعة الموصل / جامعة بابل" 
+                  required
+                >
+              </div>
+              <div id="university-err" class="invalid-feedback">
+                يرجى كتابة اسم الجامعة.
+              </div>
+            </div>
+
+            <!-- 3. الكلية -->
+            <div class="form-group">
+              <label for="college">
+                <i class="fa-solid fa-graduation-cap"></i>
+                <span>الكلية</span>
+                <span class="req">*</span>
+              </label>
+              <div class="input-wrapper">
+                <input 
+                  type="text" 
+                  id="college" 
+                  name="college" 
+                  class="form-control" 
+                  placeholder="مثال: كلية التربية للعلوم الصرفة / كلية التربية الرياضية" 
+                  required
+                >
+              </div>
+              <div id="college-err" class="invalid-feedback">
+                يرجى كتابة اسم الكلية.
+              </div>
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <!-- 4. القسم -->
+            <div class="form-group">
+              <label for="department">
+                <i class="fa-solid fa-sitemap"></i>
+                <span>القسم</span>
+                <span class="req">*</span>
+              </label>
+              <div class="input-wrapper">
+                <input 
+                  type="text" 
+                  id="department" 
+                  name="department" 
+                  class="form-control" 
+                  placeholder="مثال: علوم الحاسوب / اللغة العربية / الفيزياء" 
+                  required
+                >
+              </div>
+              <div id="department-err" class="invalid-feedback">
+                يرجى كتابة اسم القسم الدراسي.
+              </div>
+            </div>
+
+            <!-- 5. القطاع ( او منطقة السكن ) -->
+            <div class="form-group">
+              <label for="sector">
+                <i class="fa-solid fa-map-location-dot"></i>
+                <span>القطاع ( أو منطقة السكن )</span>
+                <span class="req">*</span>
+              </label>
+              <div class="input-wrapper">
+                <input 
+                  type="text" 
+                  id="sector" 
+                  name="sector" 
+                  class="form-control" 
+                  placeholder="أدخل القطاع أو منطقة السكن داخل المحافظة حالياً" 
+                  required
+                >
+              </div>
+              <div id="sector-err" class="invalid-feedback">
+                يرجى كتابة القطاع أو منطقة السكن.
+              </div>
+            </div>
+          </div>
+
+          <!-- User Requirement: ايقونة باسم "انقر هنا للحصول على الكود" -->
+          <div class="form-actions-bar">
+            <button id="btn-generate-code" type="submit" class="btn-submit-code">
+              <i class="fa-solid fa-key"></i>
+              <span>انقر هنا للحصول على الكود</span>
+            </button>
+            <button type="button" class="btn-back" onclick="navigateToPage(1)">
+              <i class="fa-solid fa-arrow-right"></i>
+              <span>العودة إلى الصفحة الرئيسية</span>
+            </button>
+          </div>
+
+        </form>
+      </section>
+
+      <!-- ================= PAGE 3: صفحة الكود والشكر ================= -->
+      <section id="page-3" class="page">
+        <div class="thankyou-wrapper">
+          
+          <div class="success-badge-icon">
+            <i class="fa-solid fa-check"></i>
+          </div>
+
+          <!-- Gratitude Statement as Requested -->
+          <h2 class="thankyou-heading">شكراً جزيلاً على تعاونكم معنا</h2>
+          <p class="thankyou-sub">
+            تم تسجيل بياناتكم بنجاح في قاعدة بيانات قسم الإعداد والتدريب للطلبة المطبقين من خارج المحافظة. إليكم رمز المطبق الرسمي الخاص بكم:
+          </p>
+
+          <!-- Cloud Sync Status Notification -->
+          <div id="cloud-status-banner" style="display:none; max-width: 580px; margin: 0 auto 1.5rem; border-radius: 12px; padding: 0.85rem 1.25rem; font-size: 0.95rem; font-weight: 700; text-align: right; line-height: 1.5;"></div>
+
+          <!-- Generated Code Badge -->
+          <div class="code-display-card">
+            <div class="code-label">
+              <i class="fa-solid fa-certificate" style="color: var(--gold-light);"></i>
+              كود التطبيق المعتمد (Student Code):
+            </div>
+            
+            <div id="student-code-output" class="code-value">
+              ---
+            </div>
+
+            <div class="code-official-note" style="border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 0.75rem; margin-top: 0.5rem; font-size: 0.85rem; color: #cbd5e1; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+              <i class="fa-solid fa-circle-check" style="color: #10b981;"></i>
+              <span>رمز رسمي معتمد - يُرجى الاحتفاظ به وإبرازه عند مراجعة قسم الإعداد والتدريب</span>
+            </div>
+          </div>
+
+          <!-- Summary Data Card -->
+          <div class="student-summary-table">
+            <h4 style="color: var(--primary); margin-bottom: 0.75rem; font-size: 1.05rem; display: flex; align-items: center; gap: 0.5rem;">
+              <i class="fa-solid fa-id-card-clip"></i>
+              تفاصيل استمارة المطبق المسجلة:
+            </h4>
+            <div class="summary-row">
+              <span class="label">الاسم الرباعي:</span>
+              <span class="value" id="sum-name">-</span>
+            </div>
+            <div class="summary-row">
+              <span class="label">الجامعة:</span>
+              <span class="value" id="sum-university">-</span>
+            </div>
+            <div class="summary-row">
+              <span class="label">الكلية:</span>
+              <span class="value" id="sum-college">-</span>
+            </div>
+            <div class="summary-row">
+              <span class="label">القسم:</span>
+              <span class="value" id="sum-department">-</span>
+            </div>
+            <div class="summary-row">
+              <span class="label">القطاع (أو منطقة السكن):</span>
+              <span class="value" id="sum-sector">-</span>
+            </div>
+            <div class="summary-row">
+              <span class="label">تاريخ ووقت التسجيل:</span>
+              <span class="value" id="sum-date" style="direction: ltr; font-family: monospace;">-</span>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="code-actions-group">
+            <button id="btn-copy-code" class="btn-action btn-copy" type="button">
+              <i class="fa-regular fa-copy"></i>
+              <span>نسخ الكود</span>
+            </button>
+            <button id="btn-print-slip" class="btn-action btn-print" type="button" onclick="window.print()">
+              <i class="fa-solid fa-print"></i>
+              <span>طباعة الاستمارة</span>
+            </button>
+            <button class="btn-action btn-reset" type="button" onclick="resetToNew()">
+              <i class="fa-solid fa-arrows-rotate"></i>
+              <span>تسجيل طالب جديد</span>
+            </button>
+          </div>
+
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Notification Toast -->
+  <div id="toast" class="toast">
+    <i class="fa-solid fa-circle-check" style="color: #10b981;"></i>
+    <span id="toast-message">تمت العملية بنجاح</span>
+  </div>
+
+  <!-- Footer Section as Requested by User -->
+  <footer>
+    <div class="footer-content">
+      <div class="designer-credit">
+        <i class="fa-solid fa-code"></i>
+        <span>تصميم وبرمجة <span class="badge-gold">م.م صفاء هادي عبد العالي</span> - مدير قسم الاعداد والتدريب</span>
+      </div>
+      <div class="footer-subtext">
+        جميع الحقوق محفوظة &copy; <span id="currentYear"></span> | نظام تسجيل المطبقين الإلكتروني - قسم الإعداد والتدريب
+      </div>
+    </div>
+  </footer>
+
+  <!-- Application Logic -->
+  <script>
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyChIAmHk4J-wz4gp37d8qPhrJ06viwSNHY",
+      authDomain: "motabickharigy.firebaseapp.com",
+      projectId: "motabickharigy",
+      storageBucket: "motabickharigy.firebasestorage.app",
+      messagingSenderId: "828080073253",
+      appId: "1:828080073253:web:c3c1916cc0e8962dbaedcc"
+    };
+
+    let db = null;
+    try {
+      if (typeof firebase !== 'undefined') {
+        if (!firebase.apps.length) {
+          firebase.initializeApp(firebaseConfig);
+        }
+        db = firebase.firestore();
+        // Force long polling for reliable connection when running from file:// or restricted networks
+        db.settings({ experimentalForceLongPolling: true });
+      }
+    } catch (e) {
+      console.warn("Firebase initialization error:", e);
+    }
+
+    // Set Year
+    document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+    // Arabic to English Phonetic Transliteration Table for Smart Code Generation
+    const arabicToLatin = {
+      'ا': 'A', 'أ': 'A', 'إ': 'A', 'آ': 'A', 'ء': 'A', 'ئ': 'A', 'ؤ': 'U',
+      'ب': 'B', 'ت': 'T', 'ث': 'T', 'ج': 'J', 'ح': 'H', 'خ': 'K',
+      'د': 'D', 'ذ': 'D', 'ر': 'R', 'ز': 'Z', 'س': 'S', 'ش': 'S',
+      'ص': 'S', 'ض': 'D', 'ط': 'T', 'ظ': 'Z', 'ع': 'A', 'غ': 'G',
+      'ف': 'F', 'ق': 'Q', 'ك': 'K', 'ل': 'L', 'م': 'M', 'ن': 'N',
+      'ه': 'H', 'ة': 'H', 'و': 'W', 'ي': 'Y', 'ى': 'Y'
+    };
+
+    /**
+     * Extracts an English uppercase letter from a given Arabic or English string.
+     * Skips common prefixes like 'جامعة', 'كلية', 'قسم' if present to pick the distinctive core name.
+     */
+    function extractLetter(rawString, isUniversityOrDept = false) {
+      if (!rawString) return 'X';
+      
+      let text = rawString.trim();
+      
+      // If university or department, filter out generic words to pick the distinctive initial
+      if (isUniversityOrDept) {
+        text = text.replace(/^(جامعة|كلية|قسم)\s+/gi, '').trim();
+        // If "ال" (Al-) prefix exists, extract after "ال" or from "ال"
+        if (text.startsWith('ال') && text.length > 2) {
+          text = text.substring(2).trim();
+        }
+      }
+
+      if (!text) text = rawString.trim();
+
+      const firstChar = text.charAt(0);
+
+      // Check if it's already an English letter A-Z
+      if (/^[a-zA-Z]$/.test(firstChar)) {
+        return firstChar.toUpperCase();
+      }
+
+      // Check Arabic transliteration mapping
+      if (arabicToLatin[firstChar]) {
+        return arabicToLatin[firstChar];
+      }
+
+      // Fallback
+      return 'K';
+    }
+
+    /**
+     * Generates the requested student code:
+     * - 3 English letters:
+     *   1. University name initial
+     *   2. Department name initial
+     *   3. Student first name initial
+     * - 3 Random Digits (e.g. 100-999)
+     */
+    function generateStudentCode(university, department, studentName) {
+      const uLetter = extractLetter(university, true);
+      const dLetter = extractLetter(department, true);
+      
+      // For student name, take their first name's initial
+      const sLetter = extractLetter(studentName.trim(), false);
+      
+      // Random 3-digit number between 100 and 999
+      const randomDigits = Math.floor(100 + Math.random() * 900);
+      
+      return `${uLetter}${dLetter}${sLetter}-${randomDigits}`;
+    }
+
+    // State Navigation
+    function navigateToPage(pageNumber) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(`page-${pageNumber}`).classList.add('active');
+
+      // Update Step Indicators
+      for (let i = 1; i <= 3; i++) {
+        const ind = document.getElementById(`step-ind-${i}`);
+        if (!ind) continue;
+        ind.classList.remove('active', 'done');
+        if (i < pageNumber) {
+          ind.classList.add('done');
+        } else if (i === pageNumber) {
+          ind.classList.add('active');
+        }
+      }
+
+      // Connectors
+      const conn1 = document.getElementById('step-conn-1');
+      const conn2 = document.getElementById('step-conn-2');
+      if (conn1) conn1.className = 'step-connector' + (pageNumber > 1 ? ' done' : '');
+      if (conn2) conn2.className = 'step-connector' + (pageNumber > 2 ? ' done' : '');
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Toast Utility
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-message');
+      toastMsg.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3500);
+    }
+
+    // DOM Elements
+    const btnGotoForm = document.getElementById('btn-goto-form');
+    const registrationForm = document.getElementById('registrationForm');
+    const fullNameInput = document.getElementById('fullName');
+    const universityInput = document.getElementById('university');
+    const collegeInput = document.getElementById('college');
+    const departmentInput = document.getElementById('department');
+    const sectorInput = document.getElementById('sector');
+
+    // Button "انقر هنا" in Home Page to go to Form
+    btnGotoForm.addEventListener('click', () => {
+      navigateToPage(2);
+    });
+
+    // Validation Helpers
+    function validateInput(input, errorElementId, customCondition = null) {
+      const val = input.value.trim();
+      const errEl = document.getElementById(errorElementId);
+      let isValid = true;
+
+      if (!val) {
+        isValid = false;
+      } else if (customCondition && !customCondition(val)) {
+        isValid = false;
+      }
+
+      if (isValid) {
+        input.classList.remove('is-invalid');
+        input.classList.add('is-valid');
+        if (errEl) errEl.style.display = 'none';
+      } else {
+        input.classList.remove('is-valid');
+        input.classList.add('is-invalid');
+        if (errEl) errEl.style.display = 'block';
+      }
+
+      return isValid;
+    }
+
+    // Full name condition: at least 3 spaces / 4 words
+    function isQuadrupleName(val) {
+      const parts = val.trim().split(/\s+/).filter(Boolean);
+      return parts.length >= 4;
+    }
+
+    // Input blur real-time validation
+    fullNameInput.addEventListener('blur', () => {
+      validateInput(fullNameInput, 'fullName-err', isQuadrupleName);
+    });
+    universityInput.addEventListener('blur', () => {
+      validateInput(universityInput, 'university-err');
+    });
+    collegeInput.addEventListener('blur', () => {
+      validateInput(collegeInput, 'college-err');
+    });
+    departmentInput.addEventListener('blur', () => {
+      validateInput(departmentInput, 'department-err');
+    });
+    sectorInput.addEventListener('blur', () => {
+      validateInput(sectorInput, 'sector-err');
+    });
+
+    // Form Submission & Code Generation
+    registrationForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const validName = validateInput(fullNameInput, 'fullName-err', isQuadrupleName);
+      const validUniv = validateInput(universityInput, 'university-err');
+      const validColl = validateInput(collegeInput, 'college-err');
+      const validDept = validateInput(departmentInput, 'department-err');
+      const validSect = validateInput(sectorInput, 'sector-err');
+
+      if (!validName || !validUniv || !validColl || !validDept || !validSect) {
+        showToast('يرجى ملء كافة الحقول الإجبارية والتأكد من صحة الاسم الرباعي!');
+        
+        // Focus first invalid input
+        const firstInvalid = registrationForm.querySelector('.is-invalid');
+        if (firstInvalid) firstInvalid.focus();
+        return;
+      }
+
+      // Button Loading State
+      const submitBtn = registrationForm.querySelector('.btn-submit-code');
+      const originalBtnHtml = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>جاري حفظ البيانات وإصدار الكود...</span>';
+
+      try {
+        // Generate the requested Code
+        const code = generateStudentCode(
+          universityInput.value,
+          departmentInput.value,
+          fullNameInput.value
+        );
+
+        const record = {
+          code: code,
+          fullName: fullNameInput.value.trim(),
+          university: universityInput.value.trim(),
+          college: collegeInput.value.trim(),
+          department: departmentInput.value.trim(),
+          sector: sectorInput.value.trim(),
+          timestamp: new Date().toLocaleString('ar-IQ', { dateStyle: 'full', timeStyle: 'short' })
+        };
+
+        // 1. Save to Google Firebase Firestore
+        let cloudSaved = false;
+        let cloudErrorMsg = '';
+
+        if (db) {
+          try {
+            await db.collection('trainee_registrations').add({
+              ...record,
+              createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            console.log('Record successfully saved to Firebase Firestore');
+            cloudSaved = true;
+          } catch (cloudErr) {
+            console.error('Firebase save error:', cloudErr);
+            if (cloudErr.code === 'permission-denied') {
+              cloudErrorMsg = 'تم رفض الصلاحيات (Permission Denied): يرجى تفعيل Rules في موقع Firebase للسماح بالكتابة والقراءة.';
+            } else if (cloudErr.message && cloudErr.message.includes('database (default) does not exist')) {
+              cloudErrorMsg = 'قاعدة بيانات Firestore غير منشأة بعد في Firebase Console! يرجى الضغط على Create Database.';
+            } else {
+              cloudErrorMsg = (cloudErr.code ? `[${cloudErr.code}] ` : '') + (cloudErr.message || 'خطأ غير معروف في الاتصال بالسحابة');
+            }
+          }
+        } else {
+          cloudErrorMsg = 'تعذر تحميل مكتبات Firebase. تحقق من اتصال الإنترنت.';
+        }
+
+        // 2. Save to localStorage as backup/cache
+        try {
+          const stored = JSON.parse(localStorage.getItem('trainee_registrations') || '[]');
+          stored.push(record);
+          localStorage.setItem('trainee_registrations', JSON.stringify(stored));
+        } catch (err) {
+          console.warn('Storage error', err);
+        }
+
+        // Populate Page 3 Summary
+        document.getElementById('student-code-output').textContent = record.code;
+        document.getElementById('sum-name').textContent = record.fullName;
+        document.getElementById('sum-university').textContent = record.university;
+        document.getElementById('sum-college').textContent = record.college;
+        document.getElementById('sum-department').textContent = record.department;
+        document.getElementById('sum-sector').textContent = record.sector;
+        document.getElementById('sum-date').textContent = record.timestamp;
+
+        // Cloud Status Banner on Page 3
+        const cloudBanner = document.getElementById('cloud-status-banner');
+        if (cloudBanner) {
+          if (cloudSaved) {
+            cloudBanner.style.display = 'block';
+            cloudBanner.style.background = '#ecfdf5';
+            cloudBanner.style.border = '2px solid #10b981';
+            cloudBanner.style.color = '#065f46';
+            cloudBanner.innerHTML = '<i class="fa-solid fa-cloud-circle-check" style="color: #059669; font-size: 1.2rem; vertical-align: middle;"></i> <strong>تم الحفظ السحابي بنجاح:</strong> بيانات المطبق أُرسلت وحُفظت فوراً في قاعدة بيانات السحابة وتظهر الآن لدى الإدارة.';
+          } else {
+            cloudBanner.style.display = 'block';
+            cloudBanner.style.background = '#fef2f2';
+            cloudBanner.style.border = '2px solid #ef4444';
+            cloudBanner.style.color = '#991b1b';
+            cloudBanner.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color: #dc2626; font-size: 1.2rem; vertical-align: middle;"></i> <strong>تنبيه السحابة:</strong> تم استخراج الكود وحفظه محلياً على جهازك، ولكن تعذر رفعه للسحابة بسبب:<br><span style="font-size: 0.88rem; font-family: monospace;">${cloudErrorMsg}</span>`;
+          }
+        }
+
+        // Navigate to Page 3
+        navigateToPage(3);
+
+        // Trigger Confetti Celebration Effect
+        if (typeof confetti === 'function') {
+          confetti({
+            particleCount: 80,
+            spread: 70,
+            origin: { y: 0.6 }
+          });
+        }
+
+        if (cloudSaved) {
+          showToast('تم حفظ البيانات في السحابة وإصدار كود المراجعة بنجاح!');
+        } else {
+          showToast('تم إصدار الكود محلياً (يوجد تنبيه سحابي)');
+        }
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnHtml;
+      }
+    });
+
+    // Copy Code Feature
+    document.getElementById('btn-copy-code').addEventListener('click', () => {
+      const code = document.getElementById('student-code-output').textContent.trim();
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(code).then(() => {
+          showToast(`تم نسخ الكود بنجاح: ${code}`);
+        });
+      } else {
+        // Fallback
+        const textarea = document.createElement('textarea');
+        textarea.value = code;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        showToast(`تم نسخ الكود بنجاح: ${code}`);
+      }
+    });
+
+    // Register Another Student
+    function resetToNew() {
+      registrationForm.reset();
+      document.querySelectorAll('.form-control').forEach(input => {
+        input.classList.remove('is-valid', 'is-invalid');
+      });
+      navigateToPage(1);
+    }
+
+    // Direct access to records via link hash or secret shortcut
+    if (window.location.hash === '#admin' || window.location.search.includes('admin')) {
+      window.location.href = 'admin.html';
+    }
+
+    // Keyboard shortcut for administration: Ctrl + Shift + A
+    window.addEventListener('keydown', (e) => {
+      if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a' || e.key === 'ش')) {
+        window.location.href = 'admin.html';
+      }
+    });
+  </script>
+</body>
+</html>

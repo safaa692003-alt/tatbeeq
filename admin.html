@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>قسم الإعداد والتدريب | لوحة إدارة سجل الطلبة المطبقين</title>
+  
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📋</text></svg>">
+  
+  <!-- Google Fonts: Cairo -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- SheetJS for Genuine Excel (.xlsx) Export with Structured Columns -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <!-- Google Firebase SDK (Compat Version) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --primary-light: #2563eb;
+      --primary-dark: #0f172a;
+      --gold: #d97706;
+      --gold-light: #f59e0b;
+      --accent: #059669;
+      --card-bg: rgba(255, 255, 255, 0.98);
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Cairo', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background: #f1f5f9;
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    header {
+      background: linear-gradient(135deg, #0a192f 0%, #1e3a8a 60%, #172554 100%);
+      color: white;
+      padding: 1.5rem 1rem;
+      border-bottom: 4px solid var(--gold);
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.25);
+    }
+
+    .header-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+
+    .logo-container {
+      width: 85px;
+      height: 85px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 6px 14px rgba(0,0,0,0.45));
+    }
+
+    .header-titles h1 {
+      font-size: 1.5rem;
+      font-weight: 900;
+      color: #ffffff;
+    }
+
+    .header-titles .dept-badge {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #fbbf24;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .btn-nav {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: white;
+      text-decoration: none;
+      padding: 0.6rem 1.25rem;
+      border-radius: 30px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+    }
+
+    .btn-nav:hover {
+      background: rgba(255, 255, 255, 0.22);
+      transform: translateY(-2px);
+    }
+
+    /* Main Container */
+    main {
+      flex: 1;
+      max-width: 1240px;
+      width: 100%;
+      margin: 1.5rem auto 3rem;
+      padding: 0 1rem;
+    }
+
+    /* Stats Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 16px;
+      padding: 1.25rem 1.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.06);
+      border: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: transform 0.2s;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-3px);
+    }
+
+    .stat-info .stat-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 700;
+      margin-bottom: 0.35rem;
+    }
+
+    .stat-info .stat-value {
+      font-size: 1.9rem;
+      font-weight: 900;
+      color: #0f172a;
+    }
+
+    .stat-icon {
+      width: 55px;
+      height: 55px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+    }
+
+    .stat-icon.blue { background: #eff6ff; color: #2563eb; }
+    .stat-icon.gold { background: #fffbeb; color: #d97706; }
+    .stat-icon.green { background: #ecfdf5; color: #059669; }
+
+    /* Control Bar: Search & Export */
+    .control-card {
+      background: white;
+      border-radius: 16px;
+      padding: 1.25rem 1.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.06);
+      border: 1px solid #e2e8f0;
+      margin-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .search-wrapper {
+      position: relative;
+      flex: 1;
+      min-width: 260px;
+      max-width: 480px;
+    }
+
+    .search-wrapper i {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94a3b8;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 0.75rem 2.75rem 0.75rem 1rem;
+      border-radius: 30px;
+      border: 2px solid #cbd5e1;
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .search-input:focus {
+      border-color: var(--primary-light);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    .action-buttons {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.65rem 1.25rem;
+      border-radius: 30px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    .btn-excel {
+      background: #059669;
+      color: white;
+    }
+
+    .btn-excel:hover {
+      background: #047857;
+    }
+
+    .btn-print {
+      background: #1e293b;
+      color: white;
+    }
+
+    .btn-print:hover {
+      background: #0f172a;
+    }
+
+    .btn-danger {
+      background: #fee2e2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+    }
+
+    .btn-danger:hover {
+      background: #fecaca;
+    }
+
+    /* Table Container */
+    .table-card {
+      background: white;
+      border-radius: 18px;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid #e2e8f0;
+      overflow: hidden;
+    }
+
+    .table-responsive {
+      overflow-x: auto;
+      width: 100%;
+    }
+
+    .records-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: right;
+    }
+
+    .records-table th {
+      background: #f8fafc;
+      color: #334155;
+      font-size: 0.9rem;
+      font-weight: 800;
+      padding: 1rem 1.25rem;
+      border-bottom: 2px solid #cbd5e1;
+      white-space: nowrap;
+    }
+
+    .records-table td {
+      padding: 0.9rem 1.25rem;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 0.92rem;
+      color: #1e293b;
+      white-space: nowrap;
+    }
+
+    .records-table tbody tr:hover {
+      background: #f8fafc;
+    }
+
+    .code-badge {
+      font-family: monospace;
+      font-size: 0.95rem;
+      font-weight: 900;
+      background: #eff6ff;
+      color: var(--primary);
+      padding: 0.3rem 0.65rem;
+      border-radius: 8px;
+      border: 1px solid #bfdbfe;
+      display: inline-block;
+      direction: ltr;
+    }
+
+    .btn-delete-row {
+      background: transparent;
+      border: none;
+      color: #ef4444;
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 0.4rem;
+      border-radius: 6px;
+      transition: background 0.2s;
+    }
+
+    .btn-delete-row:hover {
+      background: #fee2e2;
+    }
+
+    .empty-state {
+      padding: 4rem 1rem;
+      text-align: center;
+      color: #64748b;
+    }
+
+    .empty-state i {
+      font-size: 3.5rem;
+      color: #cbd5e1;
+      margin-bottom: 1rem;
+    }
+
+    .empty-state h3 {
+      font-size: 1.35rem;
+      color: #334155;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Footer */
+    footer {
+      background: #0f172a;
+      color: #94a3b8;
+      padding: 1.75rem 1rem;
+      text-align: center;
+      border-top: 3px solid var(--gold);
+      margin-top: auto;
+    }
+
+    .designer-credit {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #f8fafc;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 0.5rem 1.5rem;
+      border-radius: 50px;
+      border: 1px solid rgba(217, 119, 6, 0.4);
+      margin-bottom: 0.5rem;
+    }
+
+    .badge-gold {
+      color: #fbbf24;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #1e293b;
+      color: white;
+      padding: 0.85rem 1.75rem;
+      border-radius: 50px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 700;
+      z-index: 9999;
+      opacity: 0;
+      transition: all 0.3s;
+      pointer-events: none;
+      border-right: 4px solid var(--gold);
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* Print styling */
+    @media print {
+      body {
+        background: white !important;
+      }
+      header, .control-card, .stats-grid, footer, .btn-delete-row, th:last-child, td:last-child {
+        display: none !important;
+      }
+      .table-card {
+        box-shadow: none !important;
+        border: none !important;
+      }
+      .print-title {
+        display: block !important;
+        text-align: center;
+        margin-bottom: 1.5rem;
+      }
+    }
+    .print-title {
+      display: none;
+    }
+
+    .cloud-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1.15rem;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #38bdf8;
+      backdrop-filter: blur(6px);
+      transition: all 0.3s ease;
+    }
+    .cloud-status-badge.connected {
+      color: #34d399;
+      border-color: rgba(52, 211, 153, 0.4);
+      background: rgba(16, 185, 129, 0.12);
+    }
+    .cloud-status-badge.error {
+      color: #fbbf24;
+      border-color: rgba(251, 191, 36, 0.4);
+      background: rgba(245, 158, 11, 0.12);
+    }
+
+    /* Cloud Diagnostic Alert Card */
+    .firebase-alert-card {
+      border-radius: 14px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 1.25rem;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      animation: fadeIn 0.3s ease;
+    }
+    .firebase-alert-card.error {
+      background: #fef2f2;
+      border: 2px solid #ef4444;
+      color: #991b1b;
+    }
+    .firebase-alert-card.warning {
+      background: #fffbeb;
+      border: 2px solid #f59e0b;
+      color: #92400e;
+    }
+    .firebase-alert-card.info {
+      background: #eff6ff;
+      border: 2px solid #3b82f6;
+      color: #1e40af;
+    }
+    .firebase-alert-card.success {
+      background: #ecfdf5;
+      border: 2px solid #10b981;
+      color: #065f46;
+    }
+    .firebase-alert-card .alert-icon {
+      font-size: 2rem;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .firebase-alert-card h3 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      margin-bottom: 0.35rem;
+    }
+    .firebase-alert-card p {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 0.5rem;
+    }
+    .btn-alert-action {
+      background: #1e3a8a;
+      color: white;
+      border: none;
+      padding: 0.5rem 1.25rem;
+      border-radius: 25px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s;
+    }
+    .btn-alert-action:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="header-container">
+      <div class="header-brand">
+        <div class="logo-container">
+          <img src="logo.png" alt="شعار قسم الإعداد والتدريب" class="logo-img">
+        </div>
+        <div class="header-titles">
+          <div class="dept-badge">
+            <i class="fa-solid fa-award"></i> قسم الإعداد والتدريب
+          </div>
+          <h1>سجل الطلبة المطبقين من خارج المحافظة (لوحة الإدارة)</h1>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <div id="cloud-sync-status" class="cloud-status-badge">
+          <i class="fa-solid fa-cloud-arrow-down fa-spin"></i>
+          <span>جاري الاتصال بالسحابة...</span>
+        </div>
+        <a href="index.html" class="btn-nav">
+          <i class="fa-solid fa-arrow-right"></i>
+          <span>الذهاب لصفحة التسجيل</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main>
+
+    <!-- Printable Header only visible when printing -->
+    <div class="print-title">
+      <h2>قسم الإعداد والتدريب</h2>
+      <h3>كشف أسماء وأكواد الطلبة المطبقين من خارج المحافظة</h3>
+      <p id="print-date"></p>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-info">
+          <div class="stat-label">إجمالي الطلبة المسجلين</div>
+          <div id="stat-total" class="stat-value">0</div>
+        </div>
+        <div class="stat-icon blue">
+          <i class="fa-solid fa-user-graduate"></i>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-info">
+          <div class="stat-label">عدد الجامعات المسجلة</div>
+          <div id="stat-universities" class="stat-value">0</div>
+        </div>
+        <div class="stat-icon gold">
+          <i class="fa-solid fa-building-columns"></i>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-info">
+          <div class="stat-label">أحدث تسجيل</div>
+          <div id="stat-latest" class="stat-value" style="font-size: 1.1rem; line-height: 1.8;">-</div>
+        </div>
+        <div class="stat-icon green">
+          <i class="fa-solid fa-clock-rotate-left"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Control Bar -->
+    <div class="control-card">
+      <div class="search-wrapper">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input 
+          type="text" 
+          id="searchInput" 
+          class="search-input" 
+          placeholder="ابحث بالاسم، الكود، الجامعة، الكلية، القسم..."
+          oninput="handleSearch()"
+        >
+      </div>
+
+      <div class="action-buttons">
+        <button type="button" class="btn-action" style="background: #0f766e; color: white;" onclick="testFirebaseConnection()">
+          <i class="fa-solid fa-satellite-dish"></i>
+          <span>فحص السحابة</span>
+        </button>
+        <button type="button" class="btn-action btn-excel" onclick="exportToExcel()">
+          <i class="fa-solid fa-file-excel"></i>
+          <span>تصدير إلى Excel (CSV)</span>
+        </button>
+        <button type="button" class="btn-action btn-print" onclick="window.print()">
+          <i class="fa-solid fa-print"></i>
+          <span>طباعة الكشف</span>
+        </button>
+        <button type="button" class="btn-action btn-danger" onclick="clearAllData()">
+          <i class="fa-solid fa-trash-can"></i>
+          <span>مسح كافة السجلات</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Diagnostic Alert Banner for Cloud Database -->
+    <div id="firebase-alert-banner" class="firebase-alert-card warning" style="display: none;">
+      <div class="alert-icon" id="alert-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+      <div class="alert-content" style="flex: 1;">
+        <h3 id="alert-title">تنبيه اتصال بقاعدة البيانات السحابية</h3>
+        <p id="alert-desc">جاري فحص حالة الاتصال...</p>
+        <div id="alert-actions" style="margin-top: 0.5rem; display: flex; gap: 0.6rem; flex-wrap: wrap;"></div>
+      </div>
+    </div>
+
+    <!-- Records Table -->
+    <div class="table-card">
+      <div class="table-responsive">
+        <table class="records-table">
+          <thead>
+            <tr>
+              <th>ت</th>
+              <th>كود التطبيق</th>
+              <th>الاسم الرباعي</th>
+              <th>الجامعة</th>
+              <th>الكلية</th>
+              <th>القسم</th>
+              <th>القطاع (أو منطقة السكن)</th>
+              <th>تاريخ ووقت التسجيل</th>
+              <th>حذف</th>
+            </tr>
+          </thead>
+          <tbody id="recordsBody">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+
+      <div id="emptyState" class="empty-state" style="display: none;">
+        <i class="fa-regular fa-folder-open"></i>
+        <h3>لا توجد سجلات مطابقة</h3>
+        <p>لم يتم تسجيل طلبة حتى الآن أو لم يتم العثور على نتائج تطابق معايير البحث.</p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Toast -->
+  <div id="toast" class="toast">
+    <i class="fa-solid fa-circle-check" style="color: #10b981;"></i>
+    <span id="toast-message">تمت العملية بنجاح</span>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="designer-credit">
+      <i class="fa-solid fa-code"></i>
+      <span>تصميم وبرمجة <span class="badge-gold">م.م صفاء هادي عبد العالي</span> - مدير قسم الاعداد والتدريب</span>
+    </div>
+    <div style="font-size: 0.85rem; color: #64748b;">
+      جميع الحقوق محفوظة &copy; <span id="currentYear"></span> | لوحة إدارة قسم الإعداد والتدريب
+    </div>
+  </footer>
+
+  <script>
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyChIAmHk4J-wz4gp37d8qPhrJ06viwSNHY",
+      authDomain: "motabickharigy.firebaseapp.com",
+      projectId: "motabickharigy",
+      storageBucket: "motabickharigy.firebasestorage.app",
+      messagingSenderId: "828080073253",
+      appId: "1:828080073253:web:c3c1916cc0e8962dbaedcc"
+    };
+
+    let db = null;
+    let cloudRecords = [];
+    let isCloudConnected = false;
+
+    try {
+      if (typeof firebase !== 'undefined') {
+        if (!firebase.apps.length) {
+          firebase.initializeApp(firebaseConfig);
+        }
+        db = firebase.firestore();
+        // Force long polling for reliable connection when running from file:// or restricted networks
+        db.settings({ experimentalForceLongPolling: true });
+      }
+    } catch (e) {
+      console.warn('Firebase init error:', e);
+    }
+
+    document.getElementById('currentYear').textContent = new Date().getFullYear();
+    document.getElementById('print-date').textContent = 'تاريخ الاستخراج: ' + new Date().toLocaleString('ar-IQ');
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      document.getElementById('toast-message').textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3500);
+    }
+
+    function showBannerAlert(type, title, desc, actionsHtml = '') {
+      const banner = document.getElementById('firebase-alert-banner');
+      if (!banner) return;
+      banner.className = `firebase-alert-card ${type}`;
+      banner.style.display = 'flex';
+      
+      const iconEl = document.getElementById('alert-icon');
+      if (type === 'error') {
+        iconEl.innerHTML = '<i class="fa-solid fa-circle-xmark" style="color: #ef4444;"></i>';
+      } else if (type === 'warning') {
+        iconEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="color: #f59e0b;"></i>';
+      } else if (type === 'info') {
+        iconEl.innerHTML = '<i class="fa-solid fa-circle-info" style="color: #3b82f6;"></i>';
+      } else if (type === 'success') {
+        iconEl.innerHTML = '<i class="fa-solid fa-circle-check" style="color: #10b981;"></i>';
+      }
+
+      document.getElementById('alert-title').textContent = title;
+      document.getElementById('alert-desc').innerHTML = desc;
+      document.getElementById('alert-actions').innerHTML = actionsHtml;
+    }
+
+    function hideBannerAlert() {
+      const banner = document.getElementById('firebase-alert-banner');
+      if (banner) banner.style.display = 'none';
+    }
+
+    function showTroubleshooter(error) {
+      let title = 'خطأ في الاتصال بقاعدة البيانات السحابية';
+      let desc = '';
+      let actions = '';
+
+      const errCode = error ? (error.code || '') : '';
+      const errMsg = error ? (error.message || '') : '';
+
+      if (errCode === 'permission-denied') {
+        title = 'تم رفض الصلاحيات (Permission Denied)';
+        desc = 'قواعد الأمان (Rules) في منصة Firebase لا تسمح بالقراءة أو الكتابة حالياً.<br><strong>الحل السريع:</strong> ادخل إلى Firebase Console &gt; Firestore Database &gt; Rules واجعلها <code>allow read, write: if true;</code> ثم اضغط على زر <strong>Publish</strong>.';
+        actions = `<button class="btn-alert-action" onclick="testFirebaseConnection()"><i class="fa-solid fa-arrows-rotate"></i> إعادة فحص الاتصال بعد التعديل</button>`;
+      } else if (errCode === 'not-found' || errMsg.includes('database (default) does not exist')) {
+        title = 'قاعدة البيانات السحابية لم يتم إنشاؤها بعد!';
+        desc = 'تم تسجيل التطبيق في Firebase، لكن لم يتم تفعيل قاعدة البيانات بعد.<br><strong>الحل:</strong> ادخل إلى <a href="https://console.firebase.google.com" target="_blank" style="color: #2563eb; font-weight: bold; text-decoration: underline;">Firebase Console</a> &gt; اختر مشروعك &gt; Build &gt; Firestore Database &gt; اضغط <strong>Create database</strong>.';
+        actions = `<button class="btn-alert-action" onclick="testFirebaseConnection()"><i class="fa-solid fa-arrows-rotate"></i> إعادة فحص الاتصال بعد إنشاء القاعدة</button>`;
+      } else if (errCode === 'unavailable') {
+        title = 'تعذر الوصول لخوادم Google Firestore';
+        desc = 'يرجى التحقق من اتصال الإنترنت لديك، أو قد يكون هناك حجب مؤقت للاتصال من الشبكة.';
+        actions = `<button class="btn-alert-action" onclick="testFirebaseConnection()"><i class="fa-solid fa-arrows-rotate"></i> إعادة المحاولة</button>`;
+      } else {
+        title = 'تنبيه اتصال السحابة';
+        desc = `تفاصيل الخطأ المستلم من Firebase: <code style="font-family: monospace; background: rgba(0,0,0,0.06); padding: 2px 6px; border-radius: 4px;">${errMsg || errCode || 'غير محدد'}</code>`;
+        actions = `<button class="btn-alert-action" onclick="testFirebaseConnection()"><i class="fa-solid fa-arrows-rotate"></i> إعادة الفحص</button>`;
+      }
+
+      showBannerAlert('error', title, desc, actions);
+    }
+
+    async function testFirebaseConnection() {
+      showToast('جاري فحص الاتصال بالسحابة...');
+      if (!db) {
+        showBannerAlert('error', 'مكتبة Firebase غير مهيأة', 'تعذر تحميل مكتبات Firebase. تأكد من اتصال الإنترنت.');
+        return;
+      }
+      try {
+        const testSnap = await db.collection('trainee_registrations').limit(1).get();
+        showToast('الاتصال بالسحابة يعمل بنجاح 100%!');
+        if (testSnap.empty) {
+          checkLocalUnsyncedRecords();
+        } else {
+          hideBannerAlert();
+        }
+      } catch (err) {
+        console.error('Connection test failed:', err);
+        showTroubleshooter(err);
+      }
+    }
+
+    function checkLocalUnsyncedRecords() {
+      const local = JSON.parse(localStorage.getItem('trainee_registrations') || '[]');
+      if (local.length > 0 && cloudRecords.length === 0) {
+        showBannerAlert(
+          'info',
+          `توجد (${local.length}) سجلات تجريبية سابقة محفوظة محلياً فقط على جهازك`,
+          `تم العثور على سجلات مسجلة سابقاً في ذاكرة هذا المتصفح لم تُرفع إلى السحابة. يمكنك رفعها الآن لتظهر في السحابة للجميع.`,
+          `<button class="btn-alert-action" style="background:#059669;" onclick="syncLocalRecordsToCloud()"><i class="fa-solid fa-cloud-arrow-up"></i> رفع السجلات السابقة إلى السحابة الآن</button>`
+        );
+      } else {
+        hideBannerAlert();
+      }
+    }
+
+    async function syncLocalRecordsToCloud() {
+      const local = JSON.parse(localStorage.getItem('trainee_registrations') || '[]');
+      if (local.length === 0) {
+        showToast('لا توجد سجلات محلية لرفعها');
+        return;
+      }
+      if (!db) {
+        showToast('غير متصل بالسحابة');
+        return;
+      }
+
+      showToast('جاري رفع السجلات المحلية إلى السحابة...');
+      let uploaded = 0;
+      for (const rec of local) {
+        try {
+          await db.collection('trainee_registrations').add({
+            code: rec.code || '',
+            fullName: rec.fullName || '',
+            university: rec.university || '',
+            college: rec.college || '',
+            department: rec.department || '',
+            sector: rec.sector || '',
+            timestamp: rec.timestamp || new Date().toLocaleString('ar-IQ'),
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          uploaded++;
+        } catch (e) {
+          console.error('Upload error for item:', e);
+        }
+      }
+
+      showToast(`تم رفع ${uploaded} سجل إلى السحابة بنجاح!`);
+      hideBannerAlert();
+    }
+
+    function initFirebaseListener() {
+      const statusBadge = document.getElementById('cloud-sync-status');
+      if (!db) {
+        if (statusBadge) {
+          statusBadge.className = 'cloud-status-badge error';
+          statusBadge.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> <span>وضع محلي (غير متصل)</span>';
+        }
+        render();
+        return;
+      }
+
+      db.collection('trainee_registrations').onSnapshot((snapshot) => {
+        const records = [];
+        snapshot.forEach((doc) => {
+          records.push({
+            id: doc.id,
+            ...doc.data()
+          });
+        });
+
+        // Sort descending: newest on top
+        records.sort((a, b) => {
+          const tA = a.createdAt ? (a.createdAt.toMillis ? a.createdAt.toMillis() : (a.createdAt.seconds ? a.createdAt.seconds * 1000 : 0)) : 0;
+          const tB = b.createdAt ? (b.createdAt.toMillis ? b.createdAt.toMillis() : (b.createdAt.seconds ? b.createdAt.seconds * 1000 : 0)) : 0;
+          if (tA && tB) return tB - tA;
+          return (b.timestamp || '').localeCompare(a.timestamp || '');
+        });
+
+        cloudRecords = records;
+        isCloudConnected = true;
+
+        if (statusBadge) {
+          statusBadge.className = 'cloud-status-badge connected';
+          statusBadge.innerHTML = '<i class="fa-solid fa-cloud-check"></i> <span>متصل بالسحابة (مزامنة فورية)</span>';
+        }
+
+        if (records.length === 0) {
+          checkLocalUnsyncedRecords();
+        } else {
+          hideBannerAlert();
+        }
+
+        render();
+      }, (error) => {
+        console.error('Firestore listener error:', error);
+        isCloudConnected = false;
+        if (statusBadge) {
+          statusBadge.className = 'cloud-status-badge error';
+          statusBadge.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> <span>تعذر الاتصال بالسحابة</span>';
+        }
+        showTroubleshooter(error);
+        render();
+      });
+    }
+
+    function getRecords() {
+      if (isCloudConnected && cloudRecords) {
+        return cloudRecords;
+      }
+      try {
+        return JSON.parse(localStorage.getItem('trainee_registrations') || '[]');
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveRecords(arr) {
+      localStorage.setItem('trainee_registrations', JSON.stringify(arr));
+      render();
+    }
+
+    function updateStats(records) {
+      document.getElementById('stat-total').textContent = records.length;
+      
+      const univs = new Set(records.map(r => r.university).filter(Boolean));
+      document.getElementById('stat-universities').textContent = univs.size;
+
+      if (records.length > 0) {
+        const latest = records[0]; // Newest is at index 0
+        document.getElementById('stat-latest').textContent = latest.fullName ? latest.fullName.split(' ').slice(0, 2).join(' ') : '-';
+      } else {
+        document.getElementById('stat-latest').textContent = '-';
+      }
+    }
+
+    function render(filteredList = null) {
+      const allRecords = getRecords();
+      const records = filteredList !== null ? filteredList : allRecords;
+      updateStats(allRecords);
+
+      const tbody = document.getElementById('recordsBody');
+      const emptyState = document.getElementById('emptyState');
+      tbody.innerHTML = '';
+
+      if (records.length === 0) {
+        emptyState.style.display = 'block';
+        return;
+      }
+      emptyState.style.display = 'none';
+
+      records.forEach((rec, index) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${index + 1}</strong></td>
+          <td><span class="code-badge">${rec.code || '-'}</span></td>
+          <td><strong>${rec.fullName || '-'}</strong></td>
+          <td>${rec.university || '-'}</td>
+          <td>${rec.college || '-'}</td>
+          <td>${rec.department || '-'}</td>
+          <td>${rec.sector || '-'}</td>
+          <td style="font-size: 0.82rem; color: #64748b; direction: ltr; text-align: right;">${rec.timestamp || '-'}</td>
+          <td>
+            <button class="btn-delete-row" title="حذف هذا السجل" onclick="deleteRecord(${index})">
+              <i class="fa-regular fa-trash-can"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function handleSearch() {
+      const query = document.getElementById('searchInput').value.trim().toLowerCase();
+      const all = getRecords();
+      if (!query) {
+        render();
+        return;
+      }
+
+      const filtered = all.filter(r => {
+        return (r.fullName && r.fullName.toLowerCase().includes(query)) ||
+               (r.code && r.code.toLowerCase().includes(query)) ||
+               (r.university && r.university.toLowerCase().includes(query)) ||
+               (r.college && r.college.toLowerCase().includes(query)) ||
+               (r.department && r.department.toLowerCase().includes(query)) ||
+               (r.sector && r.sector.toLowerCase().includes(query));
+      });
+
+      render(filtered);
+    }
+
+    async function deleteRecord(index) {
+      const all = getRecords();
+      const target = all[index];
+      if (!target) return;
+
+      if (confirm(`هل أنت متأكد من حذف سجل الطالب: "${target.fullName || ''}" من قاعدة البيانات؟`)) {
+        if (target.id && db) {
+          try {
+            await db.collection('trainee_registrations').doc(target.id).delete();
+            showToast('تم حذف السجل من قاعدة البيانات السحابية بنجاح');
+          } catch (err) {
+            console.error('Error deleting document:', err);
+            showToast('تعذر الحذف من السحابة: ' + err.message);
+          }
+        } else {
+          all.splice(index, 1);
+          saveRecords(all);
+          showToast('تم حذف السجل بنجاح');
+        }
+      }
+    }
+
+    async function clearAllData() {
+      const all = getRecords();
+      if (all.length === 0) {
+        showToast('لا توجد سجلات لحذفها');
+        return;
+      }
+      if (confirm('تحذير: هل أنت متأكد من رغبتك في مسح كافة السجلات من قاعدة البيانات السحابية؟ لا يمكن استرجاعها بعد ذلك.')) {
+        if (db) {
+          try {
+            showToast('جاري مسح السجلات من السحابة...');
+            const snapshot = await db.collection('trainee_registrations').get();
+            const batch = db.batch();
+            snapshot.forEach((doc) => {
+              batch.delete(doc.ref);
+            });
+            await batch.commit();
+            cloudRecords = [];
+            localStorage.removeItem('trainee_registrations');
+            render();
+            showToast('تم مسح كافة السجلات من السحابة بنجاح');
+          } catch (err) {
+            console.error(err);
+            showToast('حدث خطأ أثناء المسح: ' + err.message);
+          }
+        } else {
+          localStorage.removeItem('trainee_registrations');
+          render();
+          showToast('تم مسح كافة السجلات محلياً');
+        }
+      }
+    }
+
+    function exportToExcel() {
+      const records = getRecords();
+      if (!records || records.length === 0) {
+        showToast('لا توجد بيانات لتصديرها');
+        return;
+      }
+
+      // Column Headers matching each form field
+      const headers = [
+        'ت',
+        'كود التطبيق',
+        'الاسم الرباعي',
+        'الجامعة',
+        'الكلية',
+        'القسم',
+        'القطاع (او منطقة السكن)',
+        'تاريخ ووقت التسجيل'
+      ];
+
+      // Prepare rows data
+      const dataRows = records.map((r, i) => [
+        i + 1,
+        r.code || '',
+        r.fullName || '',
+        r.university || '',
+        r.college || '',
+        r.department || '',
+        r.sector || '',
+        r.timestamp || ''
+      ]);
+
+      const fileName = `سجل_الطلبة_المطبقين_${new Date().toISOString().slice(0, 10)}`;
+
+      // 1. Try Native Excel XLSX Export using SheetJS
+      if (typeof XLSX !== 'undefined') {
+        try {
+          const wsData = [headers, ...dataRows];
+          const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+          // Configure column widths for optimal reading
+          ws['!cols'] = [
+            { wch: 6 },   // ت
+            { wch: 16 },  // كود التطبيق
+            { wch: 32 },  // الاسم الرباعي
+            { wch: 24 },  // الجامعة
+            { wch: 28 },  // الكلية
+            { wch: 22 },  // القسم
+            { wch: 26 },  // القطاع (او منطقة السكن)
+            { wch: 22 }   // تاريخ ووقت التسجيل
+          ];
+
+          // Set Right-To-Left view in Excel
+          ws['!views'] = [{ RTL: true }];
+
+          const wb = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(wb, ws, "الطلبة المطبقين");
+
+          XLSX.writeFile(wb, `${fileName}.xlsx`);
+          showToast('تم تصدير ملف Excel (.xlsx) مقسم لأعمدة بنجاح!');
+          return;
+        } catch (err) {
+          console.warn('SheetJS export failed, falling back to Excel XML table', err);
+        }
+      }
+
+      // 2. Offline Fallback: Excel XML Spreadsheet Format (Opens with native separate columns in Excel)
+      const xmlHeader = `<?xml version="1.0" encoding="UTF-8"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+ <Styles>
+  <Style ss:ID="HeaderStyle">
+   <Font ss:Bold="1" ss:Color="#FFFFFF" ss:FontName="Cairo"/>
+   <Interior ss:Color="#1E3A8A" ss:Pattern="Solid"/>
+   <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+  </Style>
+  <Style ss:ID="DataStyle">
+   <Font ss:FontName="Cairo"/>
+   <Alignment ss:Horizontal="Right" ss:Vertical="Center"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/>
+   </Borders>
+  </Style>
+  <Style ss:ID="CodeStyle">
+   <Font ss:Bold="1" ss:FontName="Courier New" ss:Color="#1E3A8A"/>
+   <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+   <Interior ss:Color="#EFF6FF" ss:Pattern="Solid"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#BFDBFE"/>
+   </Borders>
+  </Style>
+ </Styles>
+ <Worksheet ss:Name="الطلبة المطبقين" ss:RightToLeft="1">
+  <Table>
+   <Column ss:Width="40"/>
+   <Column ss:Width="110"/>
+   <Column ss:Width="200"/>
+   <Column ss:Width="150"/>
+   <Column ss:Width="180"/>
+   <Column ss:Width="140"/>
+   <Column ss:Width="170"/>
+   <Column ss:Width="160"/>
+   <Row ss:StyleID="HeaderStyle" ss:Height="28">
+    ${headers.map(h => `<Cell><Data ss:Type="String">${h}</Data></Cell>`).join('')}
+   </Row>
+   ${dataRows.map(row => `
+   <Row ss:StyleID="DataStyle" ss:Height="22">
+    <Cell><Data ss:Type="Number">${row[0]}</Data></Cell>
+    <Cell ss:StyleID="CodeStyle"><Data ss:Type="String">${row[1]}</Data></Cell>
+    <Cell><Data ss:Type="String">${row[2]}</Data></Cell>
+    <Cell><Data ss:Type="String">${row[3]}</Data></Cell>
+    <Cell><Data ss:Type="String">${row[4]}</Data></Cell>
+    <Cell><Data ss:Type="String">${row[5]}</Data></Cell>
+    <Cell><Data ss:Type="String">${row[6]}</Data></Cell>
+    <Cell><Data ss:Type="String">${row[7]}</Data></Cell>
+   </Row>`).join('')}
+  </Table>
+ </Worksheet>
+</Workbook>`;
+
+      const blob = new Blob([xmlHeader], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `${fileName}.xls`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast('تم تصدير ملف Excel بأعمدة منظمة بنجاح!');
+    }
+
+    // Initial load & Start Real-time Firebase Sync
+    initFirebaseListener();
+  </script>
+</body>
+</html>
